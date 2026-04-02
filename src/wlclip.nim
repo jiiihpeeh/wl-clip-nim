@@ -38,6 +38,8 @@ type
     value*: cint
     error*: cstring
 
+  WlClipError* = object of CatchableError
+
 proc wlclip_set_foreground(val: char) {.importc.}
 proc wlclip_get_text(): WlClipString {.importc.}
 proc wlclip_set_text(text: cstring): WlClipInt {.importc.}
@@ -48,32 +50,32 @@ proc wlclip_set_files(json: cstring): WlClipInt {.importc.}
 proc wlclip_free_string(`ptr`: cstring) {.importc.}
 proc wlclip_free_bytes(`ptr`: ptr uint8, len: csize_t) {.importc.}
 
-proc setFiles*(files: seq[string]) =
+proc setFiles*(files: seq[string]) {.raises: [WlClipError].} =
   let json = $(%*files)
   let res = wlclip_set_files(json.cstring)
   if res.error != nil:
-    raise newException(ValueError, $res.error)
+    raise newException(WlClipError, $res.error)
 
 proc setForeground*(blocking: bool) =
   wlclip_set_foreground(if blocking: char(1) else: char(0))
 
-proc getText*(): string =
+proc getText*(): string {.raises: [WlClipError].} =
   let res = wlclip_get_text()
   defer: wlclip_free_string(res.ptr)
   if res.error != nil:
-    raise newException(ValueError, $res.error)
+    raise newException(WlClipError, $res.error)
   if res.ptr == nil:
-    raise newException(ValueError, "clipboard is empty")
+    raise newException(WlClipError, "clipboard is empty")
   result = $res.ptr
 
-proc setText*(text: string) =
+proc setText*(text: string) {.raises: [WlClipError].} =
   let res = wlclip_set_text(text.cstring)
   if res.error != nil:
-    raise newException(ValueError, $res.error)
+    raise newException(WlClipError, $res.error)
 
-proc detectImageMime*(data: openArray[byte]): string =
+proc detectImageMime*(data: openArray[byte]): string {.raises: [WlClipError].} =
   if data.len < 4:
-    raise newException(ValueError, "Data too short for magic detection")
+    raise newException(WlClipError, "Data too short for magic detection")
   
   let d = cast[ptr UncheckedArray[uint8]](unsafeAddr data[0])
   
@@ -96,36 +98,37 @@ proc detectImageMime*(data: openArray[byte]): string =
   if data.len >= 2 and d[0] == 0xFF and d[1] == 0x0A:
     return "image/jxl"
   
-  raise newException(ValueError, "Unsupported image format")
+  raise newException(WlClipError, "Unsupported image format")
 
-proc getImage*(): seq[byte] =
+proc getImage*(): seq[byte] {.raises: [WlClipError].} =
   let res = wlclip_get_image()
   defer: wlclip_free_bytes(res.ptr, res.len)
   if res.error != nil:
-    raise newException(ValueError, $res.error)
+    raise newException(WlClipError, $res.error)
   if res.ptr == nil or res.len == 0:
-    raise newException(ValueError, "clipboard is empty or contains no image")
+    raise newException(WlClipError, "clipboard is empty or contains no image")
   result = @[]
   let slice = cast[ptr UncheckedArray[uint8]](res.ptr)
   for i in 0 ..< res.len:
     result.add(slice[i])
 
-proc setImage*(imageData: openArray[byte]) =
+proc setImage*(imageData: openArray[byte]) {.raises: [WlClipError].} =
   let mime = detectImageMime(imageData)
   let dataPtr = if imageData.len > 0: unsafeAddr(imageData[0]) else: nil
   let res = wlclip_set_image_type(cast[ptr uint8](dataPtr), imageData.len.csize_t, mime.cstring)
   if res.error != nil:
-    raise newException(ValueError, $res.error)
+    raise newException(WlClipError, $res.error)
 
-proc getFiles*(): seq[string] =
+proc getFiles*(): seq[string] {.raises: [WlClipError].} =
   let res = wlclip_get_files()
   defer: wlclip_free_string(res.ptr)
   if res.error != nil:
-    raise newException(ValueError, $res.error)
+    raise newException(WlClipError, $res.error)
   if res.ptr == nil:
-    raise newException(ValueError, "clipboard is empty or contains no files")
+    raise newException(WlClipError, "clipboard is empty or contains no files")
   let jsonStr = $res.ptr
-  let parsed = parseJson(jsonStr)
+  let parsed = try: parseJson(jsonStr) except:
+    raise newException(WlClipError, "failed to parse files JSON")
   result = @[]
   for item in parsed:
     result.add(item.str)

@@ -9,7 +9,7 @@ wlclip.setText("Hello from Nim!")
 try:
   let text = wlclip.getText()
   echo "Clipboard text: ", text
-except ValueError as e:
+except WlClipError as e:
   echo "Error: ", e.msg
 
 # Copy PNG image to clipboard
@@ -20,7 +20,7 @@ wlclip.setImage(cast[seq[byte]](decode(pngBase64)))
 try:
   let pngData = wlclip.getImage()
   echo "Clipboard image size: ", pngData.len, " bytes"
-except ValueError as e:
+except WlClipError as e:
   echo "No image in clipboard: ", e.msg
 
 # Copy files to clipboard
@@ -30,7 +30,7 @@ except ValueError as e:
 try:
   let files = wlclip.getFiles()
   echo "Clipboard files: ", files
-except ValueError as e:
+except WlClipError as e:
   echo "No files in clipboard: ", e.msg
 
 # Set foreground mode
