@@ -15,6 +15,10 @@ Nim bindings for Wayland clipboard access using Rust FFI.
 - **Wayland compositor**
 - **Linux** only (or cross-compilation to Linux)
 
+## Credits
+
+Built on top of [wl-clipboard-rs](https://github.com/YaLTeR/wl-clipboard-rs) by YaLTeR.
+
 ## Installation
 
 ```bash
@@ -103,12 +107,8 @@ API documentation: https://jiiihpeeh.github.io/wl-clip-nim/docs/
 
 To regenerate docs locally:
 ```bash
-nimble docGen   # Generates docs in ./docs/
+ nimble docGen   # Generates docs in ./docs/
 ```
-
-## Credits
-
-Built on top of [wl-clipboard-rs](https://github.com/YaLTeR/wl-clipboard-rs) by YaLTeR.
 
 ## License
 
