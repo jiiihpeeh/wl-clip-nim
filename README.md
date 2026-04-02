@@ -50,7 +50,7 @@ nimble example
 ### Manual compilation
 
 ```bash
-# Libraries are compressed (.gz) to save space - auto-decompressed on first run if needed
+# Libraries are compressed (.sz) to save space - auto-decompressed on first run if needed
 nim c -r --path:src example/example.nim
 ```
 
