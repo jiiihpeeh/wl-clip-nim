@@ -1,0 +1,35 @@
+# Nim
+nimcache/
+*.nim~
+*.c
+*.o
+*.js
+dist/
+
+# Compiled binaries
+example/example
+test/wlclip_test
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Rust build artifacts
+src/rust/target/
+src/rust/Cargo.lock
+*.a
+
+# Build tools
+build-tools/decompress
+build-tools/compress
+
+# Dependencies
+wl-clip-go/
+
+# Build output
+wlclip_nim
+
+# Instruction file
+instruction.md
