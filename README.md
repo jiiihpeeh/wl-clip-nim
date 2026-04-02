@@ -106,6 +106,10 @@ To regenerate docs locally:
 nimble docGen   # Generates docs in ./docs/
 ```
 
+## Credits
+
+Built on top of [wl-clipboard-rs](https://github.com/YaLTeR/wl-clipboard-rs) by YaLTeR.
+
 ## License
 
 MIT License
